@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "type": "shell",
+      // "command": "gcc",
+      "command": "gcc src/*.c -I./include -o build/hotel_system.exe && build\\hotel_system.exe",
+      "args": [
+        "-g",
+        "src/*.c",
+        "-I${workspaceFolder}/include",
+        "-o",
+        "${workspaceFolder}/build/hotel_system.exe"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    }
+  ]
+}
