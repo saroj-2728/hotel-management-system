@@ -1,0 +1,19 @@
+# Build directory
+build/
+
+# Compiled files
+*.exe
+*.o
+*.out
+
+# VS Code specific (optional)
+.vscode/*
+!.vscode/tasks.json
+!.vscode/settings.json
+
+# Data files
+data/
+
+# Additional VS Code files to ignore
+.vscode/c_cpp_properties.json
+.vscode/launch.json
