@@ -1,14 +1,11 @@
-// The authentication header file
 #ifndef AUTH_H
 #define AUTH_H
 
-// Constants
 #define MAX_USERNAME 50
 #define MAX_PASSWORD 50
 #define MAX_USERS 100
 #define USERS_FILE "data/users.txt"
 
-// Details of the user
 typedef struct {
     char username[MAX_USERNAME];
     char password[MAX_PASSWORD];
@@ -16,15 +13,16 @@ typedef struct {
     int active; // 0: Inactive, 1: Active
 } User;
 
-// Global variables
-extern User users[MAX_USERS];
-extern int userCount;
+typedef struct {
+    User users[MAX_USERS];
+    int count;
+} UserList;
 
-// Function prototypes
-int login(int role);
-void loadUserData();
-int validateCredentials(char* username, char* password, int role);
-int saveUserData();
-int registerUser(char* username, char* password, int role);
+void loadUserData(UserList* userList);
+int saveUserData(const UserList* userList);
+int registerUser(UserList* userList, char* username, char* password, int role);
+int validateCredentials(const UserList* userList, char* username, char* password, int role);
+int login(UserList* userList, int role);
+void viewAllUsers(const UserList* userList);
 
 #endif

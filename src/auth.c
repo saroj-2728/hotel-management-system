@@ -1,13 +1,9 @@
 #include <stdio.h>
+#include <conio.h>
 #include <string.h>
 #include "auth.h"
 
-// Get the users
-User users[MAX_USERS];
-int userCount = 0;
-
-// Initiage the login process
-int login(int role)
+int login(UserList* userList, int role)
 {
     char username[MAX_USERNAME];
     char password[MAX_PASSWORD];
@@ -21,38 +17,37 @@ int login(int role)
     printf("Password: ");
     scanf("%s", password);
 
-    return validateCredentials(username, password, role);
+    return validateCredentials(userList, username, password, role);
 }
 
-// Load user data at the beginning of the program
-void loadUserData()
+void loadUserData(UserList* userList)
 {
     FILE *file = fopen(USERS_FILE, "r");
     if (file == NULL)
     {
         // Create default admin if file doesn't exist
-        registerUser("admin", "admin123", 1);
-        registerUser("staff", "staff123", 2);
-        registerUser("customer", "customer123", 3);
-        saveUserData();
+        userList->count = 0;
+        registerUser(userList, "admin", "admin123", 1);
+        registerUser(userList, "staff", "staff123", 2);
+        registerUser(userList, "customer", "customer123", 3);
+        saveUserData(userList);
         return;
     }
 
-    userCount = 0;
+    userList->count = 0;
     while (fscanf(file, "%s %s %d %d",
-                  users[userCount].username,
-                  users[userCount].password,
-                  &users[userCount].role,
-                  &users[userCount].active) != EOF &&
-           userCount < MAX_USERS)
+                  userList->users[userList->count].username,
+                  userList->users[userList->count].password,
+                  &userList->users[userList->count].role,
+                  &userList->users[userList->count].active) != EOF &&
+           userList->count < MAX_USERS)
     {
-        userCount++;
+        userList->count++;
     }
     fclose(file);
 }
 
-// Save user data at the end of the program
-int saveUserData()
+int saveUserData(const UserList* userList)
 {
     FILE *file = fopen(USERS_FILE, "w");
     if (file == NULL)
@@ -61,55 +56,77 @@ int saveUserData()
         return 0;
     }
 
-    for (int i = 0; i < userCount; i++)
+    for (int i = 0; i < userList->count; i++)
     {
         fprintf(file, "%s %s %d %d\n",
-                users[i].username,
-                users[i].password,
-                users[i].role,
-                users[i].active);
+                userList->users[i].username,
+                userList->users[i].password,
+                userList->users[i].role,
+                userList->users[i].active);
     }
     fclose(file);
     return 1;
 }
 
-// Register a new user
-int registerUser(char *username, char *password, int role)
+int registerUser(UserList* userList, char* username, char* password, int role)
 {
-    if (userCount >= MAX_USERS)
+    if (userList->count >= MAX_USERS)
     {
         return 0;
     }
 
     // Check if username already exists
-    for (int i = 0; i < userCount; i++)
+    for (int i = 0; i < userList->count; i++)
     {
-        if (strcmp(users[i].username, username) == 0)
+        if (strcmp(userList->users[i].username, username) == 0)
         {
             return 0;
         }
     }
 
-    strcpy(users[userCount].username, username);
-    strcpy(users[userCount].password, password);
-    users[userCount].role = role;
-    users[userCount].active = 1;
-    userCount++;
+    strcpy(userList->users[userList->count].username, username);
+    strcpy(userList->users[userList->count].password, password);
+    userList->users[userList->count].role = role;
+    userList->users[userList->count].active = 1;
+    userList->count++;
     return 1;
 }
 
-// Validate user credentials on login
-int validateCredentials(char *username, char *password, int role)
+int validateCredentials(const UserList* userList, char* username, char* password, int role)
 {
-    for (int i = 0; i < userCount; i++)
+    for (int i = 0; i < userList->count; i++)
     {
-        if (strcmp(users[i].username, username) == 0 &&
-            strcmp(users[i].password, password) == 0 &&
-            users[i].role == role &&
-            users[i].active == 1)
+        if (strcmp(userList->users[i].username, username) == 0 &&
+            strcmp(userList->users[i].password, password) == 0 &&
+            userList->users[i].role == role &&
+            userList->users[i].active == 1)
         {
             return 1;
         }
     }
+
+    printf("\nInvalid credentials! Please try again.\n");
+    getch();
     return 0;
+}
+
+void viewAllUsers(const UserList* userList)
+{
+    printf("\nUsername            | Role       | Status\n");
+    printf("----------------------------------------\n");
+    
+    for (int i = 0; i < userList->count; i++)
+    {
+        printf("%-18s | ", userList->users[i].username);
+        
+        switch(userList->users[i].role)
+        {
+            case 1: printf("Admin      | "); break;
+            case 2: printf("Staff      | "); break;
+            case 3: printf("Customer   | "); break;
+            default: printf("Unknown    | ");
+        }
+        
+        printf("%s\n", userList->users[i].active ? "Active" : "Inactive");
+    }
 }
